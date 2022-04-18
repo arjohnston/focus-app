@@ -49,7 +49,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Image.asset('assets/images/logo.png'),
+        title: Center(child: Image.asset('assets/images/logo.png')),
         backgroundColor: Colors.transparent,
         elevation: 0.0,
       ),
