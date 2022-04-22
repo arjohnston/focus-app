@@ -1,42 +1,7 @@
 import 'package:flutter/material.dart';
-
-class Task {
-  Task({required this.name, required this.checked});
-  final String name;
-  bool checked;
-}
-
-class TaskItem extends StatelessWidget {
-  TaskItem({
-    required this.task,
-    required this.onTaskChanged,
-  }) : super(key: ObjectKey(task));
-
-  final Task task;
-  final dynamic onTaskChanged;
-
-  TextStyle? _getTextStyle(bool checked) {
-    if (!checked) return null;
-
-    return const TextStyle(
-      color: Colors.black54,
-      decoration: TextDecoration.lineThrough,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: ListTile(
-        onTap: () {
-          onTaskChanged(task);
-        },
-        title: Text(task.name, style: _getTextStyle(task.checked)),
-      )
-    );
-  }
-}
+import 'Tasks/Task.dart';
+import 'Tasks/TaskItem.dart';
+import 'Tasks/Repository.dart';
 
 class TasksWidget extends StatefulWidget {
   const TasksWidget({Key? key}) : super(key: key);
@@ -46,8 +11,21 @@ class TasksWidget extends StatefulWidget {
 }
 
 class _TaskListState extends State<TasksWidget> {
+  final Repository repository = Repository();
   final TextEditingController _textFieldController = TextEditingController();
-  final List<Task> _tasks = <Task>[];
+  List<Task> _tasks = <Task>[];
+
+  _TaskListState() {
+    _getTasksFromRepository();
+  }
+
+  _getTasksFromRepository() async {
+    List<Task> tasks = await repository.getTasks();
+
+    setState(() {
+      _tasks = tasks;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +43,11 @@ class _TaskListState extends State<TasksWidget> {
       floatingActionButton: FloatingActionButton(
           onPressed: () => _displayDialog(),
           tooltip: 'Add task',
-          child: const Icon(Icons.add)),
+          backgroundColor: Colors.white,
+          child: const Icon(
+            Icons.add,
+            color: Colors.blue,
+          )),
     );
   }
 
@@ -73,6 +55,7 @@ class _TaskListState extends State<TasksWidget> {
     setState(() {
       task.checked = !task.checked;
     });
+    repository.saveTasks(_tasks);
   }
 
   void _addTaskItem(String name) {
@@ -80,12 +63,12 @@ class _TaskListState extends State<TasksWidget> {
       _tasks.add(Task(name: name, checked: false));
     });
     _textFieldController.clear();
+    repository.saveTasks(_tasks);
   }
 
   Future<void> _displayDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add a new task item'),
