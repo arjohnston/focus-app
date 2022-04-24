@@ -41,6 +41,8 @@ dependencies:
   shared_preferences: ^2.0.13
   font_awesome_flutter: ^10.1.0
   provider: ^6.0.2
+  intl: ^0.17.0
+  flutter_slidable: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +73,8 @@ flutter:
   assets:
     - assets/images/background.png
     - assets/images/logo.png
+    - assets/images/checked-empty.png
+    - assets/images/checked.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

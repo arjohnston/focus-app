@@ -10,9 +10,14 @@ class Repository {
     final String? tasksString = prefs.getString(key);
 
     if (tasksString != null) {
-      final List<Task> tasks = Task.decode(tasksString);
+      try {
+        final List<Task> tasks = Task.decode(tasksString);
 
-      return tasks;
+        return tasks;
+      } on Exception {
+        await prefs.clear();
+      }
+
     }
 
     return <Task>[];
@@ -20,7 +25,13 @@ class Repository {
 
   saveTasks(List<Task> tasks) async {
     final prefs = await SharedPreferences.getInstance();
-    final String encodedData = Task.encode(tasks);
-    await prefs.setString(key, encodedData);
+
+    try {
+      final String encodedData = Task.encode(tasks);
+      await prefs.setString(key, encodedData);
+
+    } on Exception {
+      await prefs.clear();
+    }
   }
 }

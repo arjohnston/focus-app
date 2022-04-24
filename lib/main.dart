@@ -4,6 +4,8 @@ import 'TasksWidget.dart';
 import 'GoalsWidget.dart';
 import 'RemindersWidget.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -29,15 +31,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  List<Widget> _widgetOptions = <Widget>[];
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    FocusWidget(),
-    TasksWidget(),
-    GoalsWidget(),
-    RemindersWidget(),
-  ];
+  _MyHomePageState() {
+    _widgetOptions = <Widget>[
+      const FocusWidget(),
+      TasksWidget(setScene),
+      const GoalsWidget(),
+      const RemindersWidget(),
+    ];
+  }
 
-  void _onItemTapped(int index) {
+  void setScene(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -93,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 12,
         unselectedFontSize: 12,
-        onTap: _onItemTapped,
+        onTap: setScene,
       ),
     );
   }
