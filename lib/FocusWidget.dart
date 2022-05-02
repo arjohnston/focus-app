@@ -18,11 +18,8 @@ class _FocusPageState extends State<FocusWidget> with TickerProviderStateMixin {
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
-        ? '${(controller.duration!.inMinutes % 60).toString().padLeft(
-        2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(
-        2, '0')}'
-        : '${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count
-        .inSeconds % 60).toString().padLeft(2, '0')}';
+        ? '${(controller.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
+        : '${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
   double progress = 1.0;
@@ -87,32 +84,30 @@ class _FocusPageState extends State<FocusWidget> with TickerProviderStateMixin {
                     if (controller.isDismissed) {
                       showModalBottomSheet(
                         context: context,
-                        builder: (context) =>
-                            Container(
-                              height: 300,
-                              child: CupertinoTimerPicker(
-                                initialTimerDuration: controller.duration!,
-                                onTimerDurationChanged: (time) {
-                                  setState(() {
-                                    controller.duration = time;
-                                  });
-                                },
-                              ),
-                            ),
+                        builder: (context) => Container(
+                          height: 300,
+                          child: CupertinoTimerPicker(
+                            initialTimerDuration: controller.duration!,
+                            onTimerDurationChanged: (time) {
+                              setState(() {
+                                controller.duration = time;
+                              });
+                            },
+                          ),
+                        ),
                       );
                     }
                   },
                   child: AnimatedBuilder(
                     animation: controller,
-                    builder: (context, child) =>
-                        Text(
-                          countText,
-                          style: const TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Montserrat",
-                              color: Colors.white),
-                        ),
+                    builder: (context, child) => Text(
+                      countText,
+                      style: const TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Montserrat",
+                          color: Colors.white),
+                    ),
                   ),
                 ),
                 AlignPositioned(
@@ -153,17 +148,25 @@ class _FocusPageState extends State<FocusWidget> with TickerProviderStateMixin {
                             });
                           }
                         },
-                        child: const Text(
-                          'Start',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontFamily: "Montserrat",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            letterSpacing: 0.0,
-                            color: Colors.blue,
-                          ),
-                        ),
+                        child: isPlaying
+                            ? const Text('STOP',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontFamily: "Montserrat",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  letterSpacing: 0.0,
+                                  color: Colors.red,
+                                ))
+                            : const Text('START',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontFamily: "Montserrat",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  letterSpacing: 0.0,
+                                  color: Colors.blue,
+                                )),
                       ),
                     ),
                   ),
