@@ -18,9 +18,14 @@ class Repository {
     return <Reminder>[];
   }
 
-  saveTasks(List<Reminder> tasks) async {
+  saveReminders(List<Reminder> reminders) async {
     final prefs = await SharedPreferences.getInstance();
-    final String encodedData = Reminder.encode(tasks);
-    await prefs.setString(key, encodedData);
+
+    try {
+      final String encodedData = Reminder.encode(reminders);
+      await prefs.setString(key, encodedData);
+    } on Exception {
+      await prefs.clear();
+    }
   }
 }

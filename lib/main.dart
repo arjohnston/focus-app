@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus/Reminders/Reminder.dart';
 import 'FocusWidget.dart';
 import 'TasksWidget.dart';
 import 'GoalsWidget.dart';
@@ -38,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const FocusWidget(),
       TasksWidget(setScene),
       const GoalsWidget(),
-      const RemindersWidget(),
+      RemindersWidget(setScene),
     ];
   }
 
@@ -102,4 +103,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
 }
+
