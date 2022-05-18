@@ -2,7 +2,7 @@ import 'dart:convert';
 
 class Task {
   String name;
-  String goal = '';
+  String goal;
   bool checked;
   DateTime dateAdded;
 
@@ -10,9 +10,9 @@ class Task {
     required this.name,
     required this.checked,
     required this.dateAdded,
-    goal,
+    required this.goal,
   }) {
-    this.goal = goal ?? '';
+    // this.goal = goal ?? '';
   }
 
   factory Task.fromJson(Map<String, dynamic> jsonData) {

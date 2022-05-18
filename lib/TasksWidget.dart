@@ -196,9 +196,9 @@ class _TaskListState extends State<TasksWidget> {
     _getTasksFromRepository();
   }
 
-  void _addTaskItem(String name) {
+  void _addTaskItem(String name, String goal) {
     setState(() {
-      _tasks.add(Task(name: name, checked: false, dateAdded: DateTime.now()));
+      _tasks.add(Task(name: name, checked: false, goal: goal, dateAdded: DateTime.now()));
     });
     _textFieldController.clear();
     repository.saveTasks(_tasks);
@@ -227,7 +227,7 @@ class _TaskListState extends State<TasksWidget> {
               child: const Text('Add'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _addTaskItem(_textFieldController.text);
+                _addTaskItem(_textFieldController.text,_textFieldController.text );
               },
             ),
           ],
@@ -247,7 +247,9 @@ class _TaskListState extends State<TasksWidget> {
           content: TextField(
             controller: _textFieldController,
             decoration: const InputDecoration(hintText: 'Type your task'),
+
           ),
+
           actions: <Widget>[
             TextButton(
               child: const Text('Save'),
