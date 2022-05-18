@@ -14,7 +14,9 @@ class TasksWidget extends StatefulWidget {
 
 class _TaskListState extends State<TasksWidget> {
   final Repository repository = Repository();
-  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _taskTextFieldController = TextEditingController();
+  final TextEditingController _goalTextFieldController = TextEditingController();
+
   List<Task> _tasks = <Task>[];
 
   _TaskListState() {
@@ -198,9 +200,9 @@ class _TaskListState extends State<TasksWidget> {
 
   void _addTaskItem(String name, String goal) {
     setState(() {
-      _tasks.add(Task(name: name, checked: false, goal: goal, dateAdded: DateTime.now()));
+      _tasks.add(Task(name: name, goal: goal, checked: false, dateAdded: DateTime.now()));
     });
-    _textFieldController.clear();
+    _taskTextFieldController.clear();
     repository.saveTasks(_tasks);
   }
 
@@ -208,7 +210,7 @@ class _TaskListState extends State<TasksWidget> {
     setState(() {
       task.name = name;
     });
-    _textFieldController.clear();
+    _taskTextFieldController.clear();
     repository.saveTasks(_tasks);
   }
 
@@ -217,17 +219,31 @@ class _TaskListState extends State<TasksWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add a new task item'),
-          content: TextField(
-            controller: _textFieldController,
-            decoration: const InputDecoration(hintText: 'Type your new task'),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget> [
+              TextFormField(
+              controller: _taskTextFieldController,
+              decoration: const InputDecoration(hintText: 'Type your new task'),
+              ),
+              TextFormField(
+                controller: _goalTextFieldController,
+                decoration: const InputDecoration(hintText: 'Give your task a goal'),
+              )
+            ],
+          // content: TextField(
+          //   controller: _taskTextFieldController,
+          //   decoration: const InputDecoration(hintText: 'Type your new task'),
+
+
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('Add'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _addTaskItem(_textFieldController.text,_textFieldController.text );
+                _addTaskItem(_taskTextFieldController.text,_goalTextFieldController.text );
               },
             ),
           ],
@@ -237,7 +253,7 @@ class _TaskListState extends State<TasksWidget> {
   }
 
   Future<void> _displayEditDialog(Task task) async {
-    _textFieldController.text = task.name;
+    _taskTextFieldController.text = task.name;
 
     return showDialog<void>(
       context: context,
@@ -245,17 +261,15 @@ class _TaskListState extends State<TasksWidget> {
         return AlertDialog(
           title: const Text('Change a task item'),
           content: TextField(
-            controller: _textFieldController,
+            controller: _taskTextFieldController,
             decoration: const InputDecoration(hintText: 'Type your task'),
-
           ),
-
           actions: <Widget>[
             TextButton(
               child: const Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _editTaskItem(task, _textFieldController.text);
+                _editTaskItem(task, _taskTextFieldController.text);
               },
             ),
           ],
