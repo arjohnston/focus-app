@@ -2,7 +2,7 @@ import 'dart:convert';
 
 class Task {
   String name;
-  String goal;
+  String goal = '';
   bool checked;
   DateTime dateAdded;
 

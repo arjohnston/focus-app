@@ -232,11 +232,6 @@ class _TaskListState extends State<TasksWidget> {
                 decoration: const InputDecoration(hintText: 'Give your task a goal'),
               )
             ],
-          // content: TextField(
-          //   controller: _taskTextFieldController,
-          //   decoration: const InputDecoration(hintText: 'Type your new task'),
-
-
           ),
           actions: <Widget>[
             TextButton(

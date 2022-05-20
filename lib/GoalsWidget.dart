@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'Goals/Goal.dart';
+import 'Goals/GoalsRepository.dart';
 import 'Tasks/Task.dart';
 import 'Tasks/TaskItem.dart';
 import 'Tasks/Repository.dart';
 import 'package:intl/intl.dart';
+import 'Goals/GoalItem.dart';
 
 class GoalsWidget extends StatefulWidget {
   final Function setScene;
@@ -13,20 +16,23 @@ class GoalsWidget extends StatefulWidget {
 }
 
 class _GoalListState extends State<GoalsWidget> {
-  final Repository repository = Repository();
+  final Repository repository = Repository(); // task repository
+  final GoalsRepository goalsRepository = GoalsRepository();
   final TextEditingController _textFieldController = TextEditingController();
+
   List<Task> _tasks = <Task>[];
+  List<Goal> _goals = <Goal>[];
 
   _GoalListState() {
-    _getTasksFromRepository();
+    _getGoalsFromRepository();
   }
 
-  _getTasksFromRepository() async {
-    List<Task> tasks = await repository.getTasks();
-    tasks.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
+  _getGoalsFromRepository() async {
+    List<Goal> goals = await goalsRepository.getGoals();
+    goals.sort();
 
     setState(() {
-      _tasks = tasks;
+      _goals = goals;
     });
   }
 
@@ -35,16 +41,16 @@ class _GoalListState extends State<GoalsWidget> {
     return DateFormat.yMMMMd().format(now);
   }
 
-  removeTask(Task task) {
-    List<Task> tasks = _tasks;
-    tasks.remove(task);
-
-    setState(() {
-      _tasks = tasks;
-    });
-
-    repository.saveTasks(_tasks);
-  }
+  // removeTask(Task task) {
+  //   List<Task> tasks = _tasks;
+  //   tasks.remove(task);
+  //
+  //   setState(() {
+  //     _tasks = tasks;
+  //   });
+  //
+  //   repository.saveTasks(_tasks);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class _GoalListState extends State<GoalsWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'My Tasks',
+                      'My Goals',
                       style: TextStyle(
                         color: Colors.white,
                         letterSpacing: 1.2,
@@ -132,15 +138,12 @@ class _GoalListState extends State<GoalsWidget> {
                     ListView(
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(0),
-                      children: _tasks.map((Task task) {
-                        return TaskItem(
-                          task: task,
-                          onTaskChanged: _handleTaskChange,
+                      children: _goals.map((Goal goal) {
+                        return GoalItem(
+                          goal: goal,
                           setScene: widget.setScene,
-                          removeTask: removeTask,
-                          editTask: _displayEditDialog,
                         );
-                      }).where((t) => !t.task.checked).toList(),
+                      }).toList(),
                     ),
                     Container(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
@@ -159,15 +162,12 @@ class _GoalListState extends State<GoalsWidget> {
                     ListView(
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(0),
-                      children: _tasks.map((Task task) {
-                        return TaskItem(
-                          task: task,
-                          onTaskChanged: _handleTaskChange,
+                      children: _goals.map((Goal goal) {
+                        return GoalItem(
+                          goal: goal,
                           setScene: widget.setScene,
-                          removeTask: removeTask,
-                          editTask: _displayEditDialog,
                         );
-                      }).where((t) => t.task.checked).toList(),
+                      }).toList(),
                     ),
                   ]
               ),
@@ -177,24 +177,24 @@ class _GoalListState extends State<GoalsWidget> {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-          onPressed: () => _displayNewDialog(),
-          tooltip: 'Add task',
-          backgroundColor: Colors.white,
-          child: const Icon(
-            Icons.add,
-            color: Colors.blue,
-          )),
+      // floatingActionButton: FloatingActionButton(
+      //     onPressed: () => _displayNewDialog(),
+      //     tooltip: 'Add task',
+      //     backgroundColor: Colors.white,
+      //     child: const Icon(
+      //       Icons.add,
+      //       color: Colors.blue,
+      //     )),
     );
   }
 
-  void _handleTaskChange(Task task) {
-    setState(() {
-      task.checked = !task.checked;
-    });
-    repository.saveTasks(_tasks);
-    _getTasksFromRepository();
-  }
+  // void _handleTaskChange(Task task) {
+  //   setState(() {
+  //     task.checked = !task.checked;
+  //   });
+  //   repository.saveTasks(_tasks);
+  //   _getTasksFromRepository();
+  // }
 
   void _addTaskItem(String name, String goal) {
     setState(() {
@@ -212,30 +212,30 @@ class _GoalListState extends State<GoalsWidget> {
     repository.saveTasks(_tasks);
   }
 
-  Future<void> _displayNewDialog() async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add a new task item'),
-          content: TextField(
-            controller: _textFieldController,
-            decoration: const InputDecoration(hintText: 'Type your new task'),
-
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _addTaskItem(_textFieldController.text,_textFieldController.text );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Future<void> _displayNewDialog() async {
+  //   return showDialog<void>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Add a new task item'),
+  //         content: TextField(
+  //           controller: _textFieldController,
+  //           decoration: const InputDecoration(hintText: 'Type your new task'),
+  //
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('Add'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //               _addTaskItem(_textFieldController.text,_textFieldController.text );
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _displayEditDialog(Task task) async {
     _textFieldController.text = task.name;
