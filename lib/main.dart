@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _widgetOptions = <Widget>[
       const FocusWidget(),
       TasksWidget(setScene),
-      const GoalsWidget(),
+      GoalsWidget(setScene),
       RemindersWidget(setScene),
     ];
   }
