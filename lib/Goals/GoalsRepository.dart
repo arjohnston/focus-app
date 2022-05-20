@@ -2,10 +2,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Goal.dart';
 
-class Repository {
+class GoalsRepository {
   String key = 'goals';
 
-  getTasks() async {
+  getGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final String? goalsString = prefs.getString(key);
 
