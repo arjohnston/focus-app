@@ -2,7 +2,7 @@ import 'dart:convert';
 
 class Task {
   String name;
-  String goal = '';
+  // String goal = '';
   bool checked;
   DateTime dateAdded;
 
@@ -10,7 +10,6 @@ class Task {
     required this.name,
     required this.checked,
     required this.dateAdded,
-    required this.goal,
   }) {
     // this.goal = goal ?? '';
   }
@@ -18,7 +17,7 @@ class Task {
   factory Task.fromJson(Map<String, dynamic> jsonData) {
     return Task(
       name: jsonData['name'],
-      goal: jsonData['goal'],
+      // goal: jsonData['goal'],
       checked: jsonData['checked'],
       dateAdded: DateTime.parse(jsonData['dateAdded']),
     );
@@ -26,7 +25,7 @@ class Task {
 
   static Map<String, dynamic> toMap(Task task) => {
     'name': task.name,
-    'goal': task.goal,
+    // 'goal': task.goal,
     'checked': task.checked,
     'dateAdded': task.dateAdded.toIso8601String(),
   };

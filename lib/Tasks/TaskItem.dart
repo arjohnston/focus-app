@@ -20,7 +20,8 @@ class TaskItem extends StatelessWidget {
   TextStyle? _getTextStyle(bool checked) {
     if (!checked) {
       return const TextStyle(
-        color: Color.fromARGB(255, 108, 108, 108)
+        color: Color.fromARGB(255, 108, 108, 108),
+        fontSize: 16
       );
     }
 
@@ -114,13 +115,6 @@ class TaskItem extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          task.goal.isNotEmpty ? task.goal.toUpperCase() : 'GOAL',
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 180, 180, 180),
-                            fontSize: 10,
-                          ),
-                        ),
                         const Padding(padding: EdgeInsets.all(2)),
                         Text(
                           task.name,

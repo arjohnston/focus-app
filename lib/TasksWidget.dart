@@ -15,7 +15,6 @@ class TasksWidget extends StatefulWidget {
 class _TaskListState extends State<TasksWidget> {
   final Repository repository = Repository();
   final TextEditingController _taskTextFieldController = TextEditingController();
-  final TextEditingController _goalTextFieldController = TextEditingController();
 
   List<Task> _tasks = <Task>[];
 
@@ -63,7 +62,7 @@ class _TaskListState extends State<TasksWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                    'My Tasks',
+                    'My Tasks Today',
                       style: TextStyle(
                         color: Colors.white,
                         letterSpacing: 1.2,
@@ -80,7 +79,7 @@ class _TaskListState extends State<TasksWidget> {
                         color: Colors.white,
                         letterSpacing: 1.2,
                         fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -152,7 +151,7 @@ class _TaskListState extends State<TasksWidget> {
                             style: TextStyle(
                                 color: Colors.white,
                                 letterSpacing: 1.2,
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w900,
                             )
                         )
@@ -198,9 +197,9 @@ class _TaskListState extends State<TasksWidget> {
     _getTasksFromRepository();
   }
 
-  void _addTaskItem(String name, String goal) {
+  void _addTaskItem(String name) {
     setState(() {
-      _tasks.add(Task(name: name, goal: goal, checked: false, dateAdded: DateTime.now()));
+      _tasks.add(Task(name: name, checked: false, dateAdded: DateTime.now()));
     });
     _taskTextFieldController.clear();
     repository.saveTasks(_tasks);
@@ -226,10 +225,6 @@ class _TaskListState extends State<TasksWidget> {
               TextFormField(
               controller: _taskTextFieldController,
               decoration: const InputDecoration(hintText: 'Type your new task'),
-              ),
-              TextFormField(
-                controller: _goalTextFieldController,
-                decoration: const InputDecoration(hintText: 'Give your task a goal'),
               )
             ],
           ),
@@ -238,7 +233,7 @@ class _TaskListState extends State<TasksWidget> {
               child: const Text('Add'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _addTaskItem(_taskTextFieldController.text,_goalTextFieldController.text );
+                _addTaskItem(_taskTextFieldController.text);
               },
             ),
           ],
