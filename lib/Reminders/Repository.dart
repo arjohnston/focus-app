@@ -10,9 +10,13 @@ class Repository {
     final String? remindersString = prefs.getString(key);
 
     if (remindersString != null) {
-      final List<Reminder> reminders = Reminder.decode(remindersString);
+      try {
+        final List<Reminder> reminders = Reminder.decode(remindersString);
 
-      return reminders;
+        return reminders;
+      } on Exception {
+        await prefs.clear();
+      }
     }
 
     return <Reminder>[];

@@ -1,13 +1,46 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:focus/Reminders/Reminder.dart';
 import 'FocusWidget.dart';
+import 'Reminders/Reminder.dart';
 import 'TasksWidget.dart';
 import 'GoalsWidget.dart';
 import 'RemindersWidget.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-void main() => runApp(const MyApp());
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+Future<void> _configureLocalTimeZone() async {
+  tz.initializeTimeZones();
+  final String? timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(timeZoneName!));
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  _configureLocalTimeZone();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('app_icon');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String? payload) async {
+        if (payload != null) {
+          debugPrint('notification payload: $payload');
+        }
+      });
+
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -39,8 +72,31 @@ class _MyHomePageState extends State<MyHomePage> {
       const FocusWidget(),
       TasksWidget(setScene),
       GoalsWidget(setScene),
-      RemindersWidget(setScene),
+      RemindersWidget(setScene, setupPeriodicReminder, removePeriodicReminder),
     ];
+  }
+
+  void setupPeriodicReminder(Reminder reminder) {
+    Timer(reminder.time.difference(DateTime.now()), () => showPeriodicReminder(reminder));
+  }
+
+  void removePeriodicReminder(Reminder reminder) async {
+    await flutterLocalNotificationsPlugin.cancel(reminder.id);
+  }
+
+  void showPeriodicReminder(Reminder reminder) async {
+    // Show the notification immediately at the specified time
+    await flutterLocalNotificationsPlugin.show(reminder.id, 'Focus Reminder', reminder.name, const NotificationDetails(
+        android: AndroidNotificationDetails(
+            'focus-app', 'focus',
+            channelDescription: 'reminder notifications')));
+
+    // Show the notification at the specified interval from hereon out
+    await flutterLocalNotificationsPlugin.periodicallyShow(reminder.id, 'Focus Reminder', reminder.name, RepeatInterval.daily, const NotificationDetails(
+        android: AndroidNotificationDetails(
+            '0', 'focus',
+            channelDescription: 'reminder notifications')),
+        androidAllowWhileIdle: true);
   }
 
   void setScene(int index) {

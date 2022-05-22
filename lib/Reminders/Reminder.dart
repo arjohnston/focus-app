@@ -1,32 +1,35 @@
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 
 class Reminder {
   String name;
-  String goal = '';
   bool checked;
   DateTime dateAdded;
+  DateTime time;
+  int id;
 
   Reminder({
     required this.name,
     required this.checked,
     required this.dateAdded,
-    goal,
-  }) {
-    this.goal = goal ?? '';
-  }
+    required this.time,
+    required this.id
+  });
 
   factory Reminder.fromJson(Map<String, dynamic> jsonData) {
     return Reminder(
+      id: jsonData['id'],
       name: jsonData['name'],
-      goal: jsonData['goal'],
+      time: DateTime.parse(jsonData['time']),
       checked: jsonData['checked'],
       dateAdded: DateTime.parse(jsonData['dateAdded']),
     );
   }
 
   static Map<String, dynamic> toMap(Reminder reminder) => {
+    'id': reminder.id,
     'name': reminder.name,
-    'goal': reminder.goal,
+    'time': reminder.time.toIso8601String(),
     'checked': reminder.checked,
     'dateAdded': reminder.dateAdded.toIso8601String(),
   };

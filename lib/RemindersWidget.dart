@@ -1,12 +1,19 @@
+
 import 'package:flutter/material.dart';
 import 'Reminders/Reminder.dart';
 import 'Reminders/ReminderItem.dart';
 import 'Reminders/Repository.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class RemindersWidget extends StatefulWidget {
   final Function setScene;
-  const RemindersWidget(this.setScene, {Key? key}) : super(key: key);
+  final Function setupPeriodicReminder;
+  final Function removePeriodicReminder;
+  const RemindersWidget(this.setScene, this.setupPeriodicReminder, this.removePeriodicReminder, {Key? key}) : super(key: key);
 
   @override
   _ReminderListState createState() => _ReminderListState();
@@ -15,6 +22,7 @@ class RemindersWidget extends StatefulWidget {
 class _ReminderListState extends State<RemindersWidget> {
   final Repository repository = Repository();
   final TextEditingController _textFieldController = TextEditingController();
+  DateTime _dateTime = DateTime.now();
   List<Reminder> _reminders = <Reminder>[];
 
   _ReminderListState() {
@@ -23,16 +31,11 @@ class _ReminderListState extends State<RemindersWidget> {
 
   _getRemindersFromRepository() async {
     List<Reminder> reminders = await repository.getReminders();
-    reminders.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
+    reminders.sort((a, b) => a.time.compareTo(b.time));
 
     setState(() {
       _reminders = reminders;
     });
-  }
-
-  _getDate() {
-    var now = DateTime.now();
-    return DateFormat.yMMMMd().format(now);
   }
 
   removeReminder(Reminder reminder) {
@@ -44,6 +47,7 @@ class _ReminderListState extends State<RemindersWidget> {
     });
 
     repository.saveReminders(_reminders);
+    widget.removePeriodicReminder(reminder);
   }
 
   @override
@@ -59,8 +63,8 @@ class _ReminderListState extends State<RemindersWidget> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
+                  children: const [
+                    Text(
                       'My Reminders',
                       style: TextStyle(
                         color: Colors.white,
@@ -68,56 +72,6 @@ class _ReminderListState extends State<RemindersWidget> {
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(3),
-                    ),
-                    Text(
-                      _getDate(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    SizedBox(
-                        width: 70,
-                        height: 70,
-                        child: DecoratedBox(
-                          decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(Radius.circular(35))
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                  _reminders.where((t) => !t.checked).toList().length.toString(),
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 4, 141, 218),
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w600,
-                                  )
-                              ),
-                              Container(
-                                  margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                  child: Text(
-                                      "/" + (_reminders.length).toString(),
-                                      style: const TextStyle(
-                                        color: Color.fromARGB(255, 4, 141, 218),
-                                        fontSize: 14,
-                                      )
-                                  )
-                              ),
-                            ],
-                          ),
-                        )
-
                     ),
                   ],
                 ),
@@ -140,34 +94,7 @@ class _ReminderListState extends State<RemindersWidget> {
                           removeReminder: removeReminder,
                           editReminder: _displayEditDialog,
                         );
-                      }).where((t) => !t.reminder.checked).toList(),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
-                      child: _reminders.isNotEmpty && _reminders.where((t) => t.checked).toList().isNotEmpty
-                          ? const Text(
-                          'COMPLETED',
-                          style: TextStyle(
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                          )
-                      )
-                          : null,
-                    ),
-                    ListView(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.all(0),
-                      children: _reminders.map((Reminder reminder) {
-                        return ReminderItem(
-                          reminder: reminder,
-                          onReminderChanged: _handleReminderChange,
-                          setScene: widget.setScene,
-                          removeReminder: removeReminder,
-                          editReminder: _displayEditDialog,
-                        );
-                      }).where((t) => t.reminder.checked).toList(),
+                      }).toList(),
                     ),
                   ]
               ),
@@ -194,19 +121,27 @@ class _ReminderListState extends State<RemindersWidget> {
     });
     repository.saveReminders(_reminders);
     _getRemindersFromRepository();
+
+    if (!reminder.checked) {
+      widget.removePeriodicReminder(reminder);
+    }
   }
 
-  void _addReminderItem(String name) {
+  void _addReminderItem(String name, DateTime time) {
+    Reminder reminder = Reminder(id: time.millisecondsSinceEpoch ~/ 10000, name: name, checked: true, dateAdded: DateTime.now(), time: time);
     setState(() {
-      _reminders.add(Reminder(name: name, checked: false, dateAdded: DateTime.now()));
+      _reminders.add(reminder);
     });
     _textFieldController.clear();
     repository.saveReminders(_reminders);
+
+    widget.setupPeriodicReminder(reminder);
   }
 
-  void _editReminderItem(Reminder reminder, String name) {
+  void _editReminderItem(Reminder reminder, String name, DateTime time) {
     setState(() {
       reminder.name = name;
+      reminder.time = time;
     });
     _textFieldController.clear();
     repository.saveReminders(_reminders);
@@ -218,16 +153,42 @@ class _ReminderListState extends State<RemindersWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add a new reminder'),
-          content: TextField(
-            controller: _textFieldController,
-            decoration: const InputDecoration(hintText: 'Type your new reminder'),
+          content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Select time"),
+                const Padding(padding: EdgeInsets.all(4)),
+                TimePickerSpinner(
+                  is24HourMode: false,
+                  normalTextStyle: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey
+                  ),
+                  highlightedTextStyle: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.black
+                  ),
+                  itemHeight: 30,
+                  isForce2Digits: true,
+                  onTimeChange: (time) {
+                    setState(() {
+                      _dateTime = time;
+                    });
+                  },
+                ),
+                const Padding(padding: EdgeInsets.all(10)),
+                TextField(
+                  controller: _textFieldController,
+                  decoration: const InputDecoration(hintText: 'Type your new reminder'),
+                ),
+              ]
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('Add'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _addReminderItem(_textFieldController.text);
+                _addReminderItem(_textFieldController.text, _dateTime);
               },
             ),
           ],
@@ -244,16 +205,42 @@ class _ReminderListState extends State<RemindersWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Change a reminder'),
-          content: TextField(
-            controller: _textFieldController,
-            decoration: const InputDecoration(hintText: 'Type your reminder'),
+          content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Select time"),
+                const Padding(padding: EdgeInsets.all(4)),
+                TimePickerSpinner(
+                  is24HourMode: false,
+                  normalTextStyle: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey
+                  ),
+                  highlightedTextStyle: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.black
+                  ),
+                  itemHeight: 30,
+                  isForce2Digits: true,
+                  onTimeChange: (time) {
+                    setState(() {
+                      _dateTime = time;
+                    });
+                  },
+                ),
+                const Padding(padding: EdgeInsets.all(10)),
+                TextField(
+                  controller: _textFieldController,
+                  decoration: const InputDecoration(hintText: 'Type your new reminder'),
+                ),
+              ]
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _editReminderItem(reminder, _textFieldController.text);
+                _editReminderItem(reminder, _textFieldController.text, _dateTime);
               },
             ),
           ],
